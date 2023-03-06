@@ -1,0 +1,18 @@
+{
+  "name": "chatbot-twitch",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsc && node ./index.js"
+  },
+  "dependencies": {
+    "@types/node": "^18.14.6",
+    "class-validator": "^0.14.0",
+    "tmi.js": "^1.8.5",
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
+}

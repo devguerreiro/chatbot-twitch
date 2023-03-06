@@ -1,0 +1,10 @@
+{
+  "twitch": {
+    "token_endpoint": "https://id.twitch.tv/oauth2/token",
+    "username": "wall-e",
+    "client_id": "<client id for the bot>",
+    "client_secret": "<client secret for the bot>",
+    "authorization_code": "<Authorization Code for the Chat Bot's account>",
+    "channel": "amberfoxy"
+  }
+}
