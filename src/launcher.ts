@@ -20,7 +20,6 @@ export class TwitchChatBot {
 
   async launch() {
     this.tokenDetails = await this.fetchAccessToken();
-    console.log(this.tokenDetails);
 
     this.twitchClient = new this.tmi.Client(
       this.buildConnectionConfig(
