@@ -3,8 +3,8 @@ import { InvalidTwitchConfigError } from "../exceptions/config";
 import { ChatBotConfig } from "../models/config.model";
 
 export class ConfigValidator {
-  public static async readConfig(configPath: string): Promise<ChatBotConfig> {
-    const configJson = JSON.parse(require("fs").readFileSync(configPath));
+  public static async readConfig(): Promise<ChatBotConfig> {
+    const configJson = require("../../config");
 
     try {
       console.info("Validating Config...");

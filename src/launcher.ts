@@ -11,6 +11,7 @@ import { CommandHandlerExecutionError } from "./exceptions/command";
 
 export class TwitchChatBot {
   tmi = require("tmi.js");
+  fs = require("fs");
 
   public twitchClient: any;
   private tokenDetails!: TwitchTokenDetails;
@@ -19,6 +20,8 @@ export class TwitchChatBot {
 
   async launch() {
     this.tokenDetails = await this.fetchAccessToken();
+    console.log(this.tokenDetails);
+
     this.twitchClient = new this.tmi.Client(
       this.buildConnectionConfig(
         this.config.twitchChannel,
@@ -28,6 +31,50 @@ export class TwitchChatBot {
     );
     this.setupBotBehavior();
     this.twitchClient.connect();
+  }
+
+  private async fetchRefreshToken(): Promise<TwitchTokenDetails> {
+    const axios = require("axios");
+    const db = require("../db.json");
+    console.log("Fetching Twitch OAuth Refresh Token");
+    return axios({
+      method: "post",
+      url: this.config.twitchTokenEndpoint,
+      params: {
+        client_id: this.config.twitchClientId,
+        client_secret: this.config.twitchClientSecret,
+        refresh_token: db.oauth.refresh_token,
+        grant_type: "refresh_token",
+      },
+      responseType: "json",
+    })
+      .then(async (response: any) => {
+        // handle success
+        const token = await TwitchTokenResponseValidator.parseResponse(
+          response.data
+        );
+        this.fs.writeFileSync(
+          "db.json",
+          JSON.stringify({ oauth: response.data })
+        );
+        return token;
+      })
+      .catch(function (error: any) {
+        console.log("Failed to get Twitch OAuth Refresh Token");
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          throw new TwitchResponseError(JSON.stringify(error.response.data));
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          throw new NoTwitchResponseError(error.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          throw new MalformedTwitchRequestError(error.request);
+        }
+      });
   }
 
   private async fetchAccessToken(): Promise<TwitchTokenDetails> {
@@ -45,15 +92,25 @@ export class TwitchChatBot {
       },
       responseType: "json",
     })
-      .then(async function (response: any) {
+      .then(async (response: any) => {
         // handle success
-        return await TwitchTokenResponseValidator.parseResponse(response.data);
+        const token = await TwitchTokenResponseValidator.parseResponse(
+          response.data
+        );
+        this.fs.writeFileSync(
+          "db.json",
+          JSON.stringify({ oauth: response.data })
+        );
+        return token;
       })
-      .catch(function (error: any) {
+      .catch((error: any) => {
         console.log("Failed to get Twitch OAuth Token");
         if (error.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
+          if (error.response.status == 400) {
+            return this.fetchRefreshToken();
+          }
           throw new TwitchResponseError(JSON.stringify(error.response.data));
         } else if (error.request) {
           // The request was made but no response was received
