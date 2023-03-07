@@ -54,7 +54,7 @@ export class TwitchChatBot {
         if (error.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
-          throw new TwitchResponseError(error.response.data);
+          throw new TwitchResponseError(JSON.stringify(error.response.data));
         } else if (error.request) {
           // The request was made but no response was received
           // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
@@ -91,7 +91,8 @@ export class TwitchChatBot {
       "message",
       (channel: any, tags: any, message: any, self: any) => {
         // Ignore messages from itself.
-        if (self) return;
+        // if (self) return;
+        console.log({ channel, tags, message, self });
 
         const match = message.match(/^(\!\w+)\s?(\w+)?/);
         if (match) {
