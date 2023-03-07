@@ -12,6 +12,7 @@ import { CommandHandlerExecutionError } from "./exceptions/command";
 export class TwitchChatBot {
   tmi = require("tmi.js");
   fs = require("fs");
+  db = require("./db.json");
 
   public twitchClient: any;
   private tokenDetails!: TwitchTokenDetails;
@@ -34,7 +35,8 @@ export class TwitchChatBot {
 
   private async fetchRefreshToken(): Promise<TwitchTokenDetails> {
     const axios = require("axios");
-    const db = require("../db.json");
+    console.log(this.db);
+
     console.log("Fetching Twitch OAuth Refresh Token");
     return axios({
       method: "post",
@@ -42,7 +44,7 @@ export class TwitchChatBot {
       params: {
         client_id: this.config.twitchClientId,
         client_secret: this.config.twitchClientSecret,
-        refresh_token: db.oauth.refresh_token,
+        refresh_token: this.db.oauth.refresh_token,
         grant_type: "refresh_token",
       },
       responseType: "json",
@@ -53,7 +55,7 @@ export class TwitchChatBot {
           response.data
         );
         this.fs.writeFileSync(
-          "db.json",
+          "src/app/db.json",
           JSON.stringify({ oauth: response.data })
         );
         return token;
@@ -78,6 +80,8 @@ export class TwitchChatBot {
 
   private async fetchAccessToken(): Promise<TwitchTokenDetails> {
     const axios = require("axios");
+    console.log(this.config);
+
     console.log("Fetching Twitch OAuth Token");
     return axios({
       method: "post",
@@ -97,7 +101,7 @@ export class TwitchChatBot {
           response.data
         );
         this.fs.writeFileSync(
-          "db.json",
+          "src/app/db.json",
           JSON.stringify({ oauth: response.data })
         );
         return token;

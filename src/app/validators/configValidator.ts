@@ -4,7 +4,7 @@ import { ChatBotConfig } from "../models/config.model";
 
 export class ConfigValidator {
   public static async readConfig(): Promise<ChatBotConfig> {
-    const configJson = require("../../config");
+    const configJson = require("../config");
 
     try {
       console.info("Validating Config...");
