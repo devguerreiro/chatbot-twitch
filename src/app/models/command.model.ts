@@ -1,3 +1,3 @@
 export interface ICommand {
-  handler: (arg?: string) => void;
+  handler: (arg?: string) => string;
 }

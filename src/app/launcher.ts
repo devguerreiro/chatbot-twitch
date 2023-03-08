@@ -35,7 +35,6 @@ export class TwitchChatBot {
 
   private async fetchRefreshToken(): Promise<TwitchTokenDetails> {
     const axios = require("axios");
-    console.log(this.db);
 
     console.log("Fetching Twitch OAuth Refresh Token");
     return axios({
@@ -80,7 +79,6 @@ export class TwitchChatBot {
 
   private async fetchAccessToken(): Promise<TwitchTokenDetails> {
     const axios = require("axios");
-    console.log(this.config);
 
     console.log("Fetching Twitch OAuth Token");
     return axios({
@@ -152,17 +150,17 @@ export class TwitchChatBot {
       (channel: any, tags: any, message: any, self: any) => {
         // Ignore messages from itself.
         // if (self) return;
-        console.log({ channel, tags, message, self });
 
         const match = message.match(/^(\!\w+)\s?(\w+)?/);
         if (match) {
           const command = match[1];
           const arg = match[2];
 
-          const commandHandler = this.getCommand(command);
+          const commandHandler = this.getCommandHandler(command);
 
           try {
-            if (commandHandler !== null) commandHandler.handler(arg);
+            if (commandHandler !== null)
+              this.twitchClient.say(channel, commandHandler.handler(arg));
           } catch (err: unknown) {
             if (err instanceof CommandHandlerExecutionError) {
               console.log(err.message);
@@ -173,9 +171,10 @@ export class TwitchChatBot {
     );
   }
 
-  private getCommand(command: string): ICommand | null {
+  private getCommandHandler(command: string): ICommand | null {
     try {
-      return require(`./commands/${command}`) as ICommand;
+      const _command = command.replace(/\!/g, "");
+      return require(`./commands/${_command}`) as ICommand;
     } catch (err: unknown) {
       return null;
     }
